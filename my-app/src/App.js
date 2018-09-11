@@ -25,10 +25,10 @@ class App extends Component {
       if (this.isParanthesis(expression[i])) {
         if (this.isOpenParenthesis(expression[i])) {
           stack.push(i);
-          expressionDict[i] = {'color': 'red', 'item': expression[i]}
+          expressionDict[i] = {'color': 'red', 'item': expression[i]};
         } else {
           if (stack.length === 0) {
-            return this.printToScreen(false, expressionDict);
+            expressionDict[i] = {'color': 'red', 'item': expression[i]};
           }
           var topIndex = stack.pop(); // pop off the top element from stack
           var top = expression[topIndex]
@@ -80,18 +80,19 @@ class App extends Component {
     var parensStr = document.getElementById('exampleFormControlTextarea1');
     var inputStr = parensStr.value;
     var answer = document.getElementById('answer');
+    var codeReview = document.getElementById('codeReview');
     if (bool) {
-      answer.innerHTML = `Your code <div> ${inputStr} </div> is balanced!`;
+      answer.innerHTML = `<font color ='green'>Your code is balanced!</font>`;
     } else {
-      answer.innerHTML = `Your code <div>`;
+      answer.innerHTML = `<font color ='red'>Your code is unbalanced, please check your code. </font>`;
       for(var key in expressionDict){
         if(expressionDict[key]['color'] === 'red'){
-          answer.innerHTML = answer.innerHTML + '<font color="red">'+expressionDict[key]['item']+'</font>';
+          codeReview.innerHTML = codeReview.innerHTML + '<font color="red">'+expressionDict[key]['item']+'</font>';
         }else{
-          answer.innerHTML = answer.innerHTML + expressionDict[key]['item'];
+          codeReview.innerHTML = codeReview.innerHTML + expressionDict[key]['item'];
         }
       };
-      answer.innerHTML = answer.innerHTML+'</div><div> is unbalanced, please check your code. </div>'
+      codeReview.innerHTML = codeReview.innerHTML+'</div>' 
       
     }
   }
@@ -120,6 +121,12 @@ class App extends Component {
               </form>
             </div>
           </div>
+          <br></br>
+          <div class="row">
+            <div class='col-md'>
+                <div id="codeReview"></div>
+              </div>
+            </div>
         </div>
       </div>
     );
