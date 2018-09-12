@@ -17,83 +17,90 @@ class App extends Component {
   isBalanced() {
     var parensStr = document.getElementById('exampleFormControlTextarea1');
     var inputStr = parensStr.value
-    if (inputStr === null) { this.printToScreen(true, expressionDict); }
+    
     var expression = inputStr.split('');
-    var stack = [];
-    var expressionDict ={};
-    for (var i = 0; i < expression.length; i++) {
-      if (this.isParanthesis(expression[i])) {
-        if (this.isOpenParenthesis(expression[i])) {
-          stack.push(i);
-          expressionDict[i] = {'color': 'red', 'item': expression[i]};
-        } else {
-          if (stack.length === 0) {
-            expressionDict[i] = {'color': 'red', 'item': expression[i]};
-          }
-          var topIndex = stack.pop(); // pop off the top element from stack
-          var top = expression[topIndex]
-          if (!this.matches(top, expression[i])) {
-            expressionDict[i] = {'color': 'red', 'item': expression[i]}
-            return this.printToScreen(false, expressionDict);
-          }else{
-            expressionDict[i] = {'color': 'green', 'item': expression[i]}
-            expressionDict[topIndex] = {'color': 'green', 'item': expression[topIndex]}
-          }
-        }
+    var line = 1;
+    var charDict = {};
+    for (var i = 0; i < expression.length; i++){
+      if(expression[i] === '\n'){
+        charDict[i] ={'char':expression[i], 'line':line}
+        line++;
       }else{
-        expressionDict[i] = {'color': 'green', 'item': expression[i]}
+        charDict[i] ={'char':expression[i], 'line':line}
       }
     }
-    var returnValue = stack.length === 0 ? true : false;
-    this.printToScreen(returnValue, expressionDict)
+    
+    if(!this.checkPairs(charDict, '(', ')')){
+      var lineErrors = this.getLineErrors(charDict)
+      return this.printToScreen(false, lineErrors)
+    };
+    if(!this.checkPairs(charDict, '[', ']')){
+      var lineErrors = this.getLineErrors(charDict)
+      return this.printToScreen(false, lineErrors)
+    };
+    if(!this.checkPairs(charDict, '{', '}')){
+      var lineErrors = this.getLineErrors(charDict)
+      return this.printToScreen(false, lineErrors)
+    };
+    return this.printToScreen(true, [0])
+    
   }
-  matches(topOfStack, closedParenthesis) {
-    var tokens = [ ['{','}'] , ['[',']'] , ['(',')'] ];
-    for (var k = 0; k < tokens.length; k++) {
-      if (tokens[k][0] === topOfStack && 
-          tokens[k][1] === closedParenthesis) {
-        return true;
+
+  getLineErrors(charDict) {
+    var lines = [];
+    for(var i = 0; i < Object.keys(charDict).length; i++){
+      if(charDict[i]['color'] === 'red'){
+        lines.push(charDict[i]['line'])
       }
     }
-    return false;
+    return lines;
   }
-  
-  isOpenParenthesis(parenthesisChar) {
-    var tokens = [ ['{','}'] , ['[',']'] , ['(',')'] ];
-    for (var j = 0; j < tokens.length; j++) {
-      if (tokens[j][0] === parenthesisChar) {
-        return true;
+
+  checkPairs(charDict, openChar, closedChar){
+    var openCount =0;
+    var closedCount =0;
+    var openedParas = [];
+    for(var i = 0; i < Object.keys(charDict).length; i++) {
+      if(charDict[i]['char'] === openChar ){
+        openCount++;
+        openedParas.push(i)
+      }else if(charDict[i]['char'] === closedChar ){
+        closedCount++;
+        openedParas.pop();
+      }
+      if(closedCount > openCount){
+        charDict[i]['color'] = 'red'
+        return false;
+      }else{
+        charDict[i]['color'] = 'green'
       }
     }
-    return false;
-  }
-  
-  isParanthesis(char) {
-    var str = '{}[]()';
-    if (str.indexOf(char) > -1) {
-      return true;
-    } else {
+    if(closedCount !== openCount){
+      for(var i = 0; i < openedParas.length; i++){
+        charDict[openedParas[i]]['color'] = 'red'
+      }
+        
       return false;
     }
+    return true;
   }
-  printToScreen(bool, expressionDict) {
+
+  printToScreen(bool, lineErrors) {
     var parensStr = document.getElementById('exampleFormControlTextarea1');
     var inputStr = parensStr.value;
     var answer = document.getElementById('answer');
-    var codeReview = document.getElementById('codeReview');
     if (bool) {
       answer.innerHTML = `<font color ='green'>Your code is balanced!</font>`;
     } else {
-      answer.innerHTML = `<font color ='red'>Your code is unbalanced, please check your code. </font>`;
-      for(var key in expressionDict){
-        if(expressionDict[key]['color'] === 'red'){
-          codeReview.innerHTML = codeReview.innerHTML + '<font color="red">'+expressionDict[key]['item']+'</font>';
+      answer.innerHTML = '<font color ="red">Your code is unbalanced, please check your code at: '
+      for(var i = 0; i < lineErrors.length; i++){
+        if(i === 0){
+          answer.innerHTML = answer.innerHTML+'Line: '+ lineErrors[i].toString()
         }else{
-          codeReview.innerHTML = codeReview.innerHTML + expressionDict[key]['item'];
+          answer.innerHTML = answer.innerHTML+', Line: '+ lineErrors[i].toString()
         }
-      };
-      codeReview.innerHTML = codeReview.innerHTML+'</div>' 
-      
+      }
+      answer.innerHTML = answer.innerHTML+'</font>';
     }
   }
 
