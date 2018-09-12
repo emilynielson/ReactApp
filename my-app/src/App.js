@@ -111,6 +111,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Code Checker</h1>
         </header>
+        <br></br>
         <div class="container">
           <div class="row">
             <div class='col-md'>
